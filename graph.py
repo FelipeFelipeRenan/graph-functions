@@ -1,5 +1,6 @@
 from collections import deque
 import heapq
+from typing import overload
 
 
 class Grafo:
@@ -288,7 +289,7 @@ class Grafo:
     
     
     
-    def CaminhoMinimo(self, vi, vj):
+    def CaminhoMinimo1(self, vi, vj):
         if vi not in self.adjacencias or vj not in self.adjacencias:
             print("Vértices de origem e/ou destino não pertencem ao grafo.")
             return None
@@ -299,18 +300,10 @@ class Grafo:
         # Usamos uma fila de prioridade (min heap) para manter os vértices a serem explorados
         fila = [(0, vi)]
 
-        # Dicionário para armazenar os predecessores de cada vértice no caminho mínimo
         predecessores = {v: None for v in self.adjacencias}
 
         while fila:
             distancia_atual, vertice_atual = heapq.heappop(fila)
-
-            if vertice_atual == vj:
-                caminho = []
-                while vertice_atual is not None:
-                    caminho.insert(0, vertice_atual)
-                    vertice_atual = predecessores[vertice_atual]
-                return caminho
 
             if distancia_atual > distancias[vertice_atual]:
                 continue
@@ -318,12 +311,19 @@ class Grafo:
             for vizinho, peso in self.adjacencias.get(vertice_atual, []):
                 nova_distancia = distancia_atual + peso
 
-                if nova_distancia < distancias[vizinho]:
+                # Verifica se o vértice vizinho não está em distancias ou se a nova distância é menor
+                if vizinho not in distancias or nova_distancia < distancias[vizinho]:
                     distancias[vizinho] = nova_distancia
                     heapq.heappush(fila, (nova_distancia, vizinho))
                     predecessores[vizinho] = vertice_atual
 
-        return None  # Não há caminho entre vi e vj
+        caminho_minimo = []
+        while vj is not None:
+            caminho_minimo.insert(0, vj)
+            vj = predecessores[vj]
+
+        return caminho_minimo
+
 
 
     
@@ -434,22 +434,3 @@ class Grafo:
             print(f"Vértice {u} -> {', '.join([f'({v}, {peso})' for v, peso in vizinhos])}")
 
 
-if __name__ == "__main__":
-    nome_arquivo = "graph.txt"  # Substitua pelo nome do arquivo de entrada
-    grafo = Grafo("", 0, 0)
-    grafo.ler_grafo_do_arquivo(nome_arquivo)
-    grafo.mostrar_grafo()
-    grafo.mostrar_lista_de_adjacencias()
-
-    # Novo grafo vazio
-    novo_grafo = Grafo.NovoGrafo()
-    print("\nGrafo Novo:")
-    novo_grafo.mostrar_grafo()
-    novo_grafo.mostrar_lista_de_adjacencias()
-
-    # Exemplo de uso da função EVertice
-    v = 55
-    if grafo.EVertice(v):
-        print(f"O vértice {v} pertence ao grafo.")
-    else:
-        print(f"O vértice {v} não pertence ao grafo.")
